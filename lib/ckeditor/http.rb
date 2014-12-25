@@ -1,6 +1,5 @@
 # encoding: utf-8
 require 'digest/sha1'
-require 'mime/types'
 
 module Ckeditor
   module Http
@@ -36,7 +35,7 @@ module Ckeditor
         @tempfile.size
       end
     end
-    
+
     # Usage (paperclip example)
     # @asset.data = QqFile.new(params[:qqfile], request)
     class QqFile < ::Tempfile
@@ -44,26 +43,26 @@ module Ckeditor
       def initialize(filename, request, tmpdir = Dir::tmpdir)
         @original_filename  = filename
         @request = request
-        
+
         super Digest::SHA1.hexdigest(filename), tmpdir
+        binmode
         fetch
       end
-     
+
       def fetch
         self.write(body)
         self.rewind
         self
       end
-     
+
       def original_filename
         @original_filename
       end
-     
+
       def content_type
-        types = MIME::Types.type_for(original_filename)
-        types.empty? ? @request.content_type : types.first.to_s
+        @request.content_type
       end
-      
+
       def body
         if @request.raw_post.respond_to?(:force_encoding)
           @request.raw_post.force_encoding("UTF-8")
@@ -72,7 +71,7 @@ module Ckeditor
         end
       end
     end
-    
+
     # Convert nested Hash to HashWithIndifferentAccess and replace
     # file upload hash with UploadedFile objects
     def self.normalize_param(*args)
